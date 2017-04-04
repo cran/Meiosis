@@ -1,0 +1,409 @@
+---
+title: "Meiosis: Simulation of meiosis in plant breeding research."
+author:
+- Dominik Mueller^[University of Hohenheim, Institute of Plant Breeding,
+                   Seed Science and Population Genetics, Stuttgart]
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+  #pdf_document:
+    toc: true
+    toc_depth: 2
+fontsize: 12pt
+geometry: margin=1in
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+header-includes:
+    - \usepackage{setspace}\doublespacing
+---
+
+# Introduction
+
+**Meiosis** is a lean R package for the simulation of meiosis events in diploid
+(or allopolyploid) plant species for genetic research in plant breeding.
+**Meiosis** offers two different but complementary approaches for the simulation
+of meiosis events that are based on different representations of the genomic
+data. The first representation, which we named *genotypic*, simply uses integer
+coding for the alleles at various loci of the genomic data. For instance, the alleles of a bi-alleleic marker are often encoded with 0 and 1.
+Meiosis is then simulated with the function `meiosis_geno` and sequences of
+integers representing parental gametes are recombined into a new gamete.
+The seconds representation, which we herein call *segmental*, encodes genomic
+data in terms of founder alleles and segment borders (see Cheng et al.
+(2015)^[[XSim](https://doi.org/10.1534/g3.115.016683)]). A founder allele can be
+thought of as a label that identifies a chunk of DNA in terms of its
+origin from so-called founder individuals. Segment borders define 
+the beginning and the end of such a chunk. Founder individuals are created 
+with to the function `create_xo_founder` and are characterized by two unique
+integers that code for the founder alleles they carry. Meiosis is then simulated by the
+function `meiosis_xo`, where the founder alleles and segment data of two gametes are
+suitably combined to form a new gamete. In order to convert genomic data from
+the *segmental* to the *genotypic* representation, it is first necessary to create
+a object of type `Converter` (reference class) and assign to it the genotypes of all
+founder individuals via the method `insert_founder`. Thereafter, the conversion
+is performed by the method `convert`. All this is illustrated in examples below.
+For simulating meiosis, we first need to simulate crossovers. This is
+done internally, but requires a list of parameters. This list can be created 
+with the function `create_xoparam` and should not be modified by the user.
+
+Meiosis is generally simulated by the functions `meiosis_geno` and `meiosis_xo`.
+However, shallow wrappers were added from simulating a cross (`cross_geno`,
+`cross_xo`), a selfing (`self_geno`, `self_xo`) and a doubled haploid
+(`dh_geno`, `dh_xo`) for convenience and code-expressiveness. However, in
+general the philosophy of **Meiosis** is to be as low-level a possible and to
+provide basic functionality with little overhead.
+
+# Data structures, choosing between representations and limitations
+
+## Data structures
+
+### Crossover parameters
+
+A list with crossover parameters is needed for the simulation of crossover
+locations, which is done internally. This list should **not** be produced by
+hand, but rather by the function `create_xoparam`. It contains parameters
+related to chromosome lengths and (possible) crossover interference.
+
+### Individuals
+
+An individual is represented by a nested list, where only its lowest level
+differs between the *genotypic* and the *segmental* representation. In general,
+an individual is a list containing exactly two gametes, the paternal and the
+maternal gamete. A gamete is itself a list of chromosomes. Only at this level,
+the two representations diverge. For the *genotypic* representation, a
+chromosome is simply an integer vector. For the *segmental* representation, it
+is two vectors of equal length, where the first vector is an integer vector
+containing founder alleles and the second vector is a numeric (double) vector
+containing the end points of segments in centiMorgan (cM).
+
+### Founder individuals
+
+A founder individual is only important for simulations using
+the *segmental* representation. Here, a founder individual has the same
+structure as a conventional individual, but there is only one founder allele on
+each chromosome that is the same for all chromosomes on a gamete. The data on
+segments are only the end points of the chromosomes. Founder individuals are the
+starting point for simulations using the function `meiosis_xo`.
+
+### Positions
+
+The "data structure" positions is simply a list that contains vectors with the
+genetic map, indicating the positions of the respective locus. There is one
+such vector for each chromosome. Map positions are given in centiMorgan, must be
+strictly increasing and the first position must be non-negative. Positons are
+required when simulating meiosis with `meiosis_geno` (*genotypic*
+representation) or when converting from *segmental* to *genotypic*.
+
+### Converter
+
+A converter is a reference class for converting data from the
+*segmental* to the *genotypic* representation. It has only two methods, namely
+`insert_founder` for inserting founder genotypes and `convert` for actually
+converting the data.
+
+**Meiosis** provides some convenience functions for checking the integrity of
+the data structures, like `check_positions`, `check_xo_individual` and
+`check_geno_individual`, but the functions, in general, do not perform any checks
+themselves and will end up with undefined behaviour if called with invalid
+arguments.
+
+
+## Choosing between the two representations
+
+The critical user might ask the legitimate question why there are two different
+representations of genomic data. The reason is two-fold. First, different
+representations have different strengths in terms of computation time and memory
+requirements. In general, the *genotypic* representation will be advantageous
+compared to the *segmental* one when (i) you don't want to bother with the more
+complicated *segmental* representation, (ii) you only simulate few generations
+in a breeding program or you always need genotypic data even for intermediate
+generations, (iii) you are only dealing with low-density genomic data. On the
+other hand, the *segmental* representation will be (possibly much) more
+efficient when using high-density genomic data and when doing simulations where
+genotypes of (intermediate) individuals are not always needed. An example would
+be the simulation of self-fertilization for a couple of generations, were you
+only care for the genotypes of the inbred lines at the very end. Another
+advantage of the *segmental* representation is that it allows you to compute a
+"realized" coefficient of co-ancestry, which is defined here as the probability
+that at a random position on the genome, an allele drawn from one individual is
+identical by descent (*i.e.*, shows the same founder allele) to a randomly drawn
+allele from a second individual. This can be done by the function
+`realized_coancestry` and allows for computing relationship coefficients that
+capture deviations from additive genetic relationships due to Mendelian
+sampling.
+
+## Limitations
+
+### Sex chromosomes
+
+*Meiosis* does not currently consider the possibility of different sexes in
+terms of gonosomes and, hence, is not suited for simulations in animal breeding.
+In case of dioecious plants, it is the responsibility of the user to manage the
+matings.
+
+### Mutations
+
+*Meiosis* does not take into account mutation events. There are various reasons
+for this. First, *Meiosis* is mainly inteded for the simulation of plant
+breeding programs, where the number of generations is limited and, hence,
+mutations will play a minor role. Second, considering simulation events is only
+easy in case of point-mutations, where an allele is replace by another and all
+allelic states are known beforehand. Third, if the user wishes to incorporate
+mutations, it is easy to do so after the simulation of meiosis.
+
+# Examples
+```{r, include = FALSE}
+library(knitr)
+opts_chunk$set(tidy.opts = list(width.cutoff = 80), tidy = TRUE)
+```
+
+The C++ routines use an independent random number generator. For seeding it, do e.g.
+```{r}
+library('Meiosis')
+set.seed(123L) ## Seed R's rng
+Meiosis::seed_rng(seed = 123L) ## Seed rng used by Meiosis
+```
+
+### Create crossover parameters
+For (internally) simulating crossover events, the functions that are used to simulate meiosis
+events accept a special list as parameter. This list is created by the function
+`create_xoparam`, which accepts as obligatory parameter a vector that contains the lengths
+of the chromosomes. Below, we randomly sample the lengths of three chromosomes and create the
+list containing the crossover parameters. See the documentation of `create_xoparam` for further
+parameters.
+
+```{r}
+n_chr <- 3L  ## number of chromosomes
+L <- runif(n = n_chr, min = 100, max = 300)  ## sample length of chromosomes in cM
+xoparam <- create_xoparam(L)  ## no interference, no obligate chiasma
+str(xoparam)
+```
+
+### Number of loci per chromosome and positions
+For the examples below, we need to simulate some genomic data. We sample the number of
+loci per chromosome as well as the positions of these loci on the respective chromosome.
+
+```{r}
+n_loci <- round(runif(n = n_chr, min = 5L, max = 10L))  ## sample number of loci
+## sample positions of loci on the chromosome
+positions <- lapply(seq_len(n_chr), function(i) sort(runif(n_loci[i], min = 0, max = L[i])))
+```
+
+#### Example 1: Simulate meiosis with genomic data in *genotypic* representation.
+This example shows how to simulate meiosis with data in the "genotypic" representation. We first
+simulate some genotypic data of an individual and then call the function `cross_geno` for
+simulating meiosis. In this case, the output is a selfing progeny of `ind`.
+
+```{r}
+ind <- replicate(2L, lapply(n_loci, function(n) sample(c(0L, 1L), n, replace = TRUE)),
+                 simplify = FALSE) ## simulate some genotypic data
+str(ind)
+
+p_geno <- Meiosis::cross_geno(father = ind, mother = ind, positions = positions,
+                              xoparam = xoparam)
+str(p_geno)
+```
+
+### Example 2: Simulate meiosis with genomic data in *segmental* representation.
+Here, I show how to do the same as in Example 1, but with data in the segmental
+representation. We first have to create one or multiple founder
+individuals. Each founder individual has two (distinct!) founder alleles. These
+founder alleles are represented by arbitrary, but unique integers. Think about
+these founder alleles as "tags" that are attached to chromosomal segments.
+As these segments are "dropped down" the pedigree and sometimes altered by a
+recombination event, the "tags" always guarantee that each chunk of the genome can
+be unambiguously assigned to one of the founder individuals. A founder
+individual is created with the function `create_xo_founder`, which accepts as
+parameters the integer labels and a vector that specifies the length of each
+chromosome in cM. A selfing is then simulated by a call to `cross_xo`.
+
+Because data in the "segmental" representation are not useful for many purposes,
+we usually will convert them (back) to the "genotypic" representation. To do so,
+we first have to create a `Converter` object. This is a special data structures
+(reference class), which has two methods: `insert_founder` and `convert`. Before
+starting with the conversion, it is necessary to tell the `Converter` object the
+genotypes of the founder individuals. This is done via the method
+`insert_founder`. The genotypic data of each founder individual that was
+involved in the generation of progenty has to be added with a call to this
+method, otherwise an error will be thrown later.
+
+```{r}
+f_alleles <- c(21L, 65L) ## 21 and 65 are arbitrary integers
+f <- Meiosis::create_xo_founder(alleles = f_alleles, L = L)
+
+p_xo <- Meiosis::cross_xo(father = f, mother = f, xoparam = xoparam)
+str(p_xo)
+```
+
+Create a converter to convert from the segmental to the genotypic representation.
+```{r}
+conv <- new(Meiosis::Converter, positions) ## create a new converter object
+conv$insert_founder(f_alleles, ind) ## insert the (one and only) founder
+str(conv$convert(p_xo)) ## convert the progeny
+```
+
+### Example 3: Derivation of inbred lines from a bi-parental cross.
+In this example, I show how te derive a number of inbred lines from a cross between two
+parents. The first part of the examples shows how to achieve this using the "genotypic"
+representation and the second part shows the "segmental" case.
+
+```{r}
+n_self <- 10L  ## number of generations of selfing
+n <- 30L ## number of progeny
+
+## Genotypic representation
+ind2 <- replicate(2L, lapply(n_loci, function(n) sample(c(0L, 1L), n, replace = TRUE)),
+                  simplify = FALSE) # Second individual as parent.
+
+pop <- replicate(n, Meiosis::cross_geno(ind, ind2, positions, xoparam), simplify = FALSE)
+for (i in seq_len(n_self)) {
+  for (j in seq_len(n)) {
+    pop[[i]] <- Meiosis::cross_geno(pop[[i]], pop[[i]], positions, xoparam)
+  }
+}
+
+## Segmental representation
+f2 <- create_xo_founder(alleles = c(55L, 77L), L = L)
+pop_xo <- replicate(n, Meiosis::cross_xo(f, f2, xoparam), simplify = FALSE)
+for (i in seq_len(n_self)) {
+  for (j in seq_len(n)) {
+    pop_xo[[i]] <- Meiosis::cross_xo(pop_xo[[i]], pop_xo[[i]], xoparam)
+  }
+}
+
+
+# conv$convert(pop[[1]]) ## error, because genotypic data of second founder not present
+conv$insert_founder(c(55L, 77L), ind2)  ## insert second founder first
+pop_geno <- lapply(pop_xo, conv$convert) ## convert whole population
+```
+Alternatively, we could have used the functions `Meiosis::self_geno` and `Meiosis::self_xo`,
+which are wrappers around `Meiosis::cross_geno` and `Meiosis::cross_xo`, for producing the
+selfings.
+
+
+### Example 4: Creation of a synthetic population
+In this example, we create a synthetic population (*segmental representation*) by
+crossing a number of founder individuals and subsequent random mating for several
+generations.
+
+```{r}
+make_synthetic <- function(founder, n_ind, n_gen) {
+
+  ## Cross parents
+  n_founder <- length(founder)
+  tmp <- combn(x = seq_len(n_founder), m = 2L)
+  combinations <- split(tmp, col(tmp))
+  pop_xo <- replicate(n = n_ind, simplify = FALSE, {
+    pair <- unlist(sample(combinations, size = 1L))
+    cross_xo(founder[[pair[1L]]], founder[[pair[2L]]], xoparam)
+  })
+
+  ## Random mating
+  for (i in seq_len(n_gen)) {
+    pop_xo_new <- pop_xo ## copy
+    for (j in seq_len(n_ind)) {
+      pair <- sample(n_ind, size = 2L, replace = TRUE)  ## selfing possible
+      pop_xo_new[[j]] <- cross_xo(pop_xo[[pair[1L]]], pop_xo[[pair[2L]]], xoparam)
+    }
+    pop_xo <- pop_xo_new ## swap
+  }
+  pop_xo
+}
+
+n_founder <- 5L  ## number of founders
+n_ind <- 100L  ## size of synthetic
+n_gen <- 10L  # generations of random mating
+alleles <- lapply(seq_len(n_founder), function(i) c(2L * i - 1L, 2L * i))
+founder <- lapply(alleles, create_xo_founder, L = L)
+
+## Create synthetic
+system.time(syn <- make_synthetic(founder, n_ind, n_gen))
+```
+
+### Example 5: Computation of realized coefficients of co-ancestry
+Here, we calculate realized coefficient of co-ancestry. These are analogous to the classical
+co-ancestry coefficients but take into account variation due to Mendelian sampling.
+```{r}
+## Calculate realized coefficients of co-ancestry.
+Meiosis::realized_coancestry(f)
+Meiosis::realized_coancestry(p_xo)  ## selfing progeny, expected coefficient is 0.75.
+```
+
+
+### Example 6: Comparison between expected and realized coefficients of co-ancestry
+Here, we verify that the realized coefficients of co-ancestry correspond, on average, to
+expected coefficients, which are half of the additive genetic relationships
+between individuals. We therefore simulate a small pedigree and used the package
+[pedigree](https://CRAN.R-project.org/package=pedigree) to compute additive
+genetic relationships.
+
+```{r}
+library('pedigree')
+
+## Create a simple pedigree
+id <- 1:6
+dam <- c(0, 0, 1, 1, 4, 4)
+sire <- c(0, 0, 2, 2, 3, 5)
+ped <- data.frame(id, dam, sire)
+
+## Compute the additive genetic relationship matrix and coefficients of co-ancestry
+cwd <- getwd()
+tpdir <- tempdir()
+setwd(tpdir)
+invisible(makeA(ped, which = rep(TRUE, length(id))))
+coanc <- read.table("A.txt")
+setwd(cwd)
+
+A <- matrix(NA_real_, nrow = length(id), ncol = length(id))
+A[as.matrix(coanc[1:2])] <- A[as.matrix(coanc[2:1])] <- coanc[[3]]
+eCoc <- A / 2  ## expected coefficients of co-ancestry
+
+## Helper function for simulating pedigree and computing realized coefficients of co-ancestry.
+sim_ped <- function() {
+  f1 <- create_xo_founder(c(1L, 2L), L)
+  f2 <- create_xo_founder(c(3L, 4L), L)
+  i1 <- cross_xo(f1, f2, xoparam)
+  i2 <- cross_xo(f1, f2, xoparam)
+  i3 <- cross_xo(i1, i2, xoparam)
+  i4 <- cross_xo(i2, i3, xoparam)
+
+  tmp <- list(f1, f2, i1, i2, i3, i4)
+  C <- matrix(data = NA_real_, nrow = length(id), ncol = length(id))
+  for (i in seq_along(id))
+    for (j in i:length(id))
+      C[i, j] <- C[j, i] <- realized_coancestry(tmp[[i]], tmp[[j]])
+  C
+}
+
+## Verify that, on average, the realized coefficients are equal to the expected coefficients.
+n <- 1000L  ## number of replicates
+rCoc_avg <- Reduce(f = `+`, x = replicate(n, sim_ped(), simplify = FALSE)) / n ##  take average
+plot(as.vector(rCoc_avg), as.vector(eCoc)); abline(0, 1)
+```
+
+### Further examples
+We can also produce a doubled haploid progeny, both from the "segmental" and the "genotypic"
+representation.
+
+```{r}
+## Simulate a doubled haploid individual.
+str(Meiosis::dh_geno(ind, positions, xoparam))
+str(conv$convert(Meiosis::dh_xo(f, xoparam)))
+```
+
+We can also compute the realized heterozygosity of an individual, i.e., the proportion of
+the genome that is heterozygous with respect to the founder alleles present.
+
+```{r}
+## Calculate realized heterozygosity.
+Meiosis::realized_heter(p_xo) 
+```
+
+# Acknowledgements
+
+Parts of the core functionality and documentation of **Meiosis** was inspired and
+adapted, respectively, from the package
+[simcross](https://github.com/kbroman/simcross) of [Karl
+Broman](http://kbroman.org/).
+

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Dominik Mueller" />
+
+<meta name="date" content="2017-04-04" />
+
+<title>Meiosis: Simulation of meiosis in plant breeding research.</title>
+
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Meiosis: Simulation of meiosis in plant breeding research.</h1>
+<h4 class="author"><em>Dominik Mueller<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a></em></h4>
+<h4 class="date"><em>2017-04-04</em></h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#data-structures-choosing-between-representations-and-limitations">Data structures, choosing between representations and limitations</a><ul>
+<li><a href="#data-structures">Data structures</a></li>
+<li><a href="#choosing-between-the-two-representations">Choosing between the two representations</a></li>
+<li><a href="#limitations">Limitations</a></li>
+</ul></li>
+<li><a href="#examples">Examples</a></li>
+<li><a href="#acknowledgements">Acknowledgements</a></li>
+</ul>
+</div>
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p><strong>Meiosis</strong> is a lean R package for the simulation of meiosis events in diploid (or allopolyploid) plant species for genetic research in plant breeding. <strong>Meiosis</strong> offers two different but complementary approaches for the simulation of meiosis events that are based on different representations of the genomic data. The first representation, which we named <em>genotypic</em>, simply uses integer coding for the alleles at various loci of the genomic data. For instance, the alleles of a bi-alleleic marker are often encoded with 0 and 1. Meiosis is then simulated with the function <code>meiosis_geno</code> and sequences of integers representing parental gametes are recombined into a new gamete. The seconds representation, which we herein call <em>segmental</em>, encodes genomic data in terms of founder alleles and segment borders (see Cheng et al. (2015)<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>). A founder allele can be thought of as a label that identifies a chunk of DNA in terms of its origin from so-called founder individuals. Segment borders define the beginning and the end of such a chunk. Founder individuals are created with to the function <code>create_xo_founder</code> and are characterized by two unique integers that code for the founder alleles they carry. Meiosis is then simulated by the function <code>meiosis_xo</code>, where the founder alleles and segment data of two gametes are suitably combined to form a new gamete. In order to convert genomic data from the <em>segmental</em> to the <em>genotypic</em> representation, it is first necessary to create a object of type <code>Converter</code> (reference class) and assign to it the genotypes of all founder individuals via the method <code>insert_founder</code>. Thereafter, the conversion is performed by the method <code>convert</code>. All this is illustrated in examples below. For simulating meiosis, we first need to simulate crossovers. This is done internally, but requires a list of parameters. This list can be created with the function <code>create_xoparam</code> and should not be modified by the user.</p>
+<p>Meiosis is generally simulated by the functions <code>meiosis_geno</code> and <code>meiosis_xo</code>. However, shallow wrappers were added from simulating a cross (<code>cross_geno</code>, <code>cross_xo</code>), a selfing (<code>self_geno</code>, <code>self_xo</code>) and a doubled haploid (<code>dh_geno</code>, <code>dh_xo</code>) for convenience and code-expressiveness. However, in general the philosophy of <strong>Meiosis</strong> is to be as low-level a possible and to provide basic functionality with little overhead.</p>
+</div>
+<div id="data-structures-choosing-between-representations-and-limitations" class="section level1">
+<h1>Data structures, choosing between representations and limitations</h1>
+<div id="data-structures" class="section level2">
+<h2>Data structures</h2>
+<div id="crossover-parameters" class="section level3">
+<h3>Crossover parameters</h3>
+<p>A list with crossover parameters is needed for the simulation of crossover locations, which is done internally. This list should <strong>not</strong> be produced by hand, but rather by the function <code>create_xoparam</code>. It contains parameters related to chromosome lengths and (possible) crossover interference.</p>
+</div>
+<div id="individuals" class="section level3">
+<h3>Individuals</h3>
+<p>An individual is represented by a nested list, where only its lowest level differs between the <em>genotypic</em> and the <em>segmental</em> representation. In general, an individual is a list containing exactly two gametes, the paternal and the maternal gamete. A gamete is itself a list of chromosomes. Only at this level, the two representations diverge. For the <em>genotypic</em> representation, a chromosome is simply an integer vector. For the <em>segmental</em> representation, it is two vectors of equal length, where the first vector is an integer vector containing founder alleles and the second vector is a numeric (double) vector containing the end points of segments in centiMorgan (cM).</p>
+</div>
+<div id="founder-individuals" class="section level3">
+<h3>Founder individuals</h3>
+<p>A founder individual is only important for simulations using the <em>segmental</em> representation. Here, a founder individual has the same structure as a conventional individual, but there is only one founder allele on each chromosome that is the same for all chromosomes on a gamete. The data on segments are only the end points of the chromosomes. Founder individuals are the starting point for simulations using the function <code>meiosis_xo</code>.</p>
+</div>
+<div id="positions" class="section level3">
+<h3>Positions</h3>
+<p>The “data structure” positions is simply a list that contains vectors with the genetic map, indicating the positions of the respective locus. There is one such vector for each chromosome. Map positions are given in centiMorgan, must be strictly increasing and the first position must be non-negative. Positons are required when simulating meiosis with <code>meiosis_geno</code> (<em>genotypic</em> representation) or when converting from <em>segmental</em> to <em>genotypic</em>.</p>
+</div>
+<div id="converter" class="section level3">
+<h3>Converter</h3>
+<p>A converter is a reference class for converting data from the <em>segmental</em> to the <em>genotypic</em> representation. It has only two methods, namely <code>insert_founder</code> for inserting founder genotypes and <code>convert</code> for actually converting the data.</p>
+<p><strong>Meiosis</strong> provides some convenience functions for checking the integrity of the data structures, like <code>check_positions</code>, <code>check_xo_individual</code> and <code>check_geno_individual</code>, but the functions, in general, do not perform any checks themselves and will end up with undefined behaviour if called with invalid arguments.</p>
+</div>
+</div>
+<div id="choosing-between-the-two-representations" class="section level2">
+<h2>Choosing between the two representations</h2>
+<p>The critical user might ask the legitimate question why there are two different representations of genomic data. The reason is two-fold. First, different representations have different strengths in terms of computation time and memory requirements. In general, the <em>genotypic</em> representation will be advantageous compared to the <em>segmental</em> one when (i) you don’t want to bother with the more complicated <em>segmental</em> representation, (ii) you only simulate few generations in a breeding program or you always need genotypic data even for intermediate generations, (iii) you are only dealing with low-density genomic data. On the other hand, the <em>segmental</em> representation will be (possibly much) more efficient when using high-density genomic data and when doing simulations where genotypes of (intermediate) individuals are not always needed. An example would be the simulation of self-fertilization for a couple of generations, were you only care for the genotypes of the inbred lines at the very end. Another advantage of the <em>segmental</em> representation is that it allows you to compute a “realized” coefficient of co-ancestry, which is defined here as the probability that at a random position on the genome, an allele drawn from one individual is identical by descent (<em>i.e.</em>, shows the same founder allele) to a randomly drawn allele from a second individual. This can be done by the function <code>realized_coancestry</code> and allows for computing relationship coefficients that capture deviations from additive genetic relationships due to Mendelian sampling.</p>
+</div>
+<div id="limitations" class="section level2">
+<h2>Limitations</h2>
+<div id="sex-chromosomes" class="section level3">
+<h3>Sex chromosomes</h3>
+<p><em>Meiosis</em> does not currently consider the possibility of different sexes in terms of gonosomes and, hence, is not suited for simulations in animal breeding. In case of dioecious plants, it is the responsibility of the user to manage the matings.</p>
+</div>
+<div id="mutations" class="section level3">
+<h3>Mutations</h3>
+<p><em>Meiosis</em> does not take into account mutation events. There are various reasons for this. First, <em>Meiosis</em> is mainly inteded for the simulation of plant breeding programs, where the number of generations is limited and, hence, mutations will play a minor role. Second, considering simulation events is only easy in case of point-mutations, where an allele is replace by another and all allelic states are known beforehand. Third, if the user wishes to incorporate mutations, it is easy to do so after the simulation of meiosis.</p>
+</div>
+</div>
+</div>
+<div id="examples" class="section level1">
+<h1>Examples</h1>
+<p>The C++ routines use an independent random number generator. For seeding it, do e.g.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">&quot;Meiosis&quot;</span>)
+<span class="kw">set.seed</span>(123L)  ## Seed R's rng
+Meiosis::<span class="kw">seed_rng</span>(<span class="dt">seed =</span> 123L)  ## Seed rng used by Meiosis</code></pre></div>
+<pre><code>## [1] 123</code></pre>
+<div id="create-crossover-parameters" class="section level3">
+<h3>Create crossover parameters</h3>
+<p>For (internally) simulating crossover events, the functions that are used to simulate meiosis events accept a special list as parameter. This list is created by the function <code>create_xoparam</code>, which accepts as obligatory parameter a vector that contains the lengths of the chromosomes. Below, we randomly sample the lengths of three chromosomes and create the list containing the crossover parameters. See the documentation of <code>create_xoparam</code> for further parameters.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">n_chr &lt;-<span class="st"> </span>3L  ## number of chromosomes
+L &lt;-<span class="st"> </span><span class="kw">runif</span>(<span class="dt">n =</span> n_chr, <span class="dt">min =</span> <span class="dv">100</span>, <span class="dt">max =</span> <span class="dv">300</span>)  ## sample length of chromosomes in cM
+xoparam &lt;-<span class="st"> </span><span class="kw">create_xoparam</span>(L)  ## no interference, no obligate chiasma
+<span class="kw">str</span>(xoparam)</code></pre></div>
+<pre><code>## List of 5
+##  $ L               : num [1:3] 158 258 182
+##  $ m               : num 0
+##  $ p               : num 1
+##  $ obligate_chiasma: logi FALSE
+##  $ Lstar           : num [1:3] 158 258 182</code></pre>
+</div>
+<div id="number-of-loci-per-chromosome-and-positions" class="section level3">
+<h3>Number of loci per chromosome and positions</h3>
+<p>For the examples below, we need to simulate some genomic data. We sample the number of loci per chromosome as well as the positions of these loci on the respective chromosome.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">n_loci &lt;-<span class="st"> </span><span class="kw">round</span>(<span class="kw">runif</span>(<span class="dt">n =</span> n_chr, <span class="dt">min =</span> 5L, <span class="dt">max =</span> 10L))  ## sample number of loci
+## sample positions of loci on the chromosome
+positions &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="kw">seq_len</span>(n_chr), function(i) <span class="kw">sort</span>(<span class="kw">runif</span>(n_loci[i], <span class="dt">min =</span> <span class="dv">0</span>, <span class="dt">max =</span> L[i])))</code></pre></div>
+<div id="example-1-simulate-meiosis-with-genomic-data-in-genotypic-representation." class="section level4">
+<h4>Example 1: Simulate meiosis with genomic data in <em>genotypic</em> representation.</h4>
+<p>This example shows how to simulate meiosis with data in the “genotypic” representation. We first simulate some genotypic data of an individual and then call the function <code>cross_geno</code> for simulating meiosis. In this case, the output is a selfing progeny of <code>ind</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ind &lt;-<span class="st"> </span><span class="kw">replicate</span>(2L, <span class="kw">lapply</span>(n_loci, function(n) <span class="kw">sample</span>(<span class="kw">c</span>(0L, 1L), n, <span class="dt">replace =</span> <span class="ot">TRUE</span>)), 
+    <span class="dt">simplify =</span> <span class="ot">FALSE</span>)  ## simulate some genotypic data
+<span class="kw">str</span>(ind)</code></pre></div>
+<pre><code>## List of 2
+##  $ :List of 3
+##   ..$ : int [1:9] 1 1 1 1 0 0 1 0 0
+##   ..$ : int [1:10] 0 0 0 0 0 0 0 0 0 0
+##   ..$ : int [1:5] 1 0 0 1 0
+##  $ :List of 3
+##   ..$ : int [1:9] 1 0 0 1 1 0 1 0 0
+##   ..$ : int [1:10] 0 1 0 1 1 1 0 1 1 1
+##   ..$ : int [1:5] 0 0 0 0 1</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p_geno &lt;-<span class="st"> </span>Meiosis::<span class="kw">cross_geno</span>(<span class="dt">father =</span> ind, <span class="dt">mother =</span> ind, <span class="dt">positions =</span> positions, 
+    <span class="dt">xoparam =</span> xoparam)
+<span class="kw">str</span>(p_geno)</code></pre></div>
+<pre><code>## List of 2
+##  $ paternal:List of 3
+##   ..$ : int [1:9] 1 0 0 1 0 0 1 0 0
+##   ..$ : int [1:10] 0 1 0 0 0 0 0 1 1 1
+##   ..$ : int [1:5] 0 0 0 1 0
+##  $ maternal:List of 3
+##   ..$ : int [1:9] 1 0 0 1 1 0 1 0 0
+##   ..$ : int [1:10] 0 0 0 0 0 0 0 0 0 0
+##   ..$ : int [1:5] 1 0 0 0 1</code></pre>
+</div>
+</div>
+<div id="example-2-simulate-meiosis-with-genomic-data-in-segmental-representation." class="section level3">
+<h3>Example 2: Simulate meiosis with genomic data in <em>segmental</em> representation.</h3>
+<p>Here, I show how to do the same as in Example 1, but with data in the segmental representation. We first have to create one or multiple founder individuals. Each founder individual has two (distinct!) founder alleles. These founder alleles are represented by arbitrary, but unique integers. Think about these founder alleles as “tags” that are attached to chromosomal segments. As these segments are “dropped down” the pedigree and sometimes altered by a recombination event, the “tags” always guarantee that each chunk of the genome can be unambiguously assigned to one of the founder individuals. A founder individual is created with the function <code>create_xo_founder</code>, which accepts as parameters the integer labels and a vector that specifies the length of each chromosome in cM. A selfing is then simulated by a call to <code>cross_xo</code>.</p>
+<p>Because data in the “segmental” representation are not useful for many purposes, we usually will convert them (back) to the “genotypic” representation. To do so, we first have to create a <code>Converter</code> object. This is a special data structures (reference class), which has two methods: <code>insert_founder</code> and <code>convert</code>. Before starting with the conversion, it is necessary to tell the <code>Converter</code> object the genotypes of the founder individuals. This is done via the method <code>insert_founder</code>. The genotypic data of each founder individual that was involved in the generation of progenty has to be added with a call to this method, otherwise an error will be thrown later.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">f_alleles &lt;-<span class="st"> </span><span class="kw">c</span>(21L, 65L)  ## 21 and 65 are arbitrary integers
+f &lt;-<span class="st"> </span>Meiosis::<span class="kw">create_xo_founder</span>(<span class="dt">alleles =</span> f_alleles, <span class="dt">L =</span> L)
+
+p_xo &lt;-<span class="st"> </span>Meiosis::<span class="kw">cross_xo</span>(<span class="dt">father =</span> f, <span class="dt">mother =</span> f, <span class="dt">xoparam =</span> xoparam)
+<span class="kw">str</span>(p_xo)</code></pre></div>
+<pre><code>## List of 2
+##  $ paternal:List of 3
+##   ..$ :List of 2
+##   .. ..$ : int [1:3] 65 21 65
+##   .. ..$ : num [1:3] 47.7 89.5 157.5
+##   ..$ :List of 2
+##   .. ..$ : int [1:4] 21 65 21 65
+##   .. ..$ : num [1:4] 134 158 254 258
+##   ..$ :List of 2
+##   .. ..$ : int [1:3] 65 21 65
+##   .. ..$ : num [1:3] 1.77 78.79 181.8
+##  $ maternal:List of 3
+##   ..$ :List of 2
+##   .. ..$ : int [1:4] 65 21 65 21
+##   .. ..$ : num [1:4] 92.3 98.4 105.4 157.5
+##   ..$ :List of 2
+##   .. ..$ : int [1:3] 65 21 65
+##   .. ..$ : num [1:3] 46.5 229.6 257.7
+##   ..$ :List of 2
+##   .. ..$ : int [1:2] 65 21
+##   .. ..$ : num [1:2] 161 182</code></pre>
+<p>Create a converter to convert from the segmental to the genotypic representation.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">conv &lt;-<span class="st"> </span><span class="kw">new</span>(Meiosis::Converter, positions)  ## create a new converter object
+conv$<span class="kw">insert_founder</span>(f_alleles, ind)  ## insert the (one and only) founder
+<span class="kw">str</span>(conv$<span class="kw">convert</span>(p_xo))  ## convert the progeny</code></pre></div>
+<pre><code>## List of 2
+##  $ :List of 3
+##   ..$ : int [1:9] 1 1 1 1 0 0 1 0 0
+##   ..$ : int [1:10] 0 0 0 0 0 0 0 0 0 1
+##   ..$ : int [1:5] 1 0 0 0 1
+##  $ :List of 3
+##   ..$ : int [1:9] 1 0 0 1 1 0 1 0 0
+##   ..$ : int [1:10] 0 0 0 0 0 0 0 1 1 1
+##   ..$ : int [1:5] 0 0 0 0 1</code></pre>
+</div>
+<div id="example-3-derivation-of-inbred-lines-from-a-bi-parental-cross." class="section level3">
+<h3>Example 3: Derivation of inbred lines from a bi-parental cross.</h3>
+<p>In this example, I show how te derive a number of inbred lines from a cross between two parents. The first part of the examples shows how to achieve this using the “genotypic” representation and the second part shows the “segmental” case.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">n_self &lt;-<span class="st"> </span>10L  ## number of generations of selfing
+n &lt;-<span class="st"> </span>30L  ## number of progeny
+
+## Genotypic representation
+ind2 &lt;-<span class="st"> </span><span class="kw">replicate</span>(2L, <span class="kw">lapply</span>(n_loci, function(n) <span class="kw">sample</span>(<span class="kw">c</span>(0L, 1L), n, <span class="dt">replace =</span> <span class="ot">TRUE</span>)), 
+    <span class="dt">simplify =</span> <span class="ot">FALSE</span>)  <span class="co"># Second individual as parent.</span>
+
+pop &lt;-<span class="st"> </span><span class="kw">replicate</span>(n, Meiosis::<span class="kw">cross_geno</span>(ind, ind2, positions, xoparam), <span class="dt">simplify =</span> <span class="ot">FALSE</span>)
+for (i in <span class="kw">seq_len</span>(n_self)) {
+    for (j in <span class="kw">seq_len</span>(n)) {
+        pop[[i]] &lt;-<span class="st"> </span>Meiosis::<span class="kw">cross_geno</span>(pop[[i]], pop[[i]], positions, xoparam)
+    }
+}
+
+## Segmental representation
+f2 &lt;-<span class="st"> </span><span class="kw">create_xo_founder</span>(<span class="dt">alleles =</span> <span class="kw">c</span>(55L, 77L), <span class="dt">L =</span> L)
+pop_xo &lt;-<span class="st"> </span><span class="kw">replicate</span>(n, Meiosis::<span class="kw">cross_xo</span>(f, f2, xoparam), <span class="dt">simplify =</span> <span class="ot">FALSE</span>)
+for (i in <span class="kw">seq_len</span>(n_self)) {
+    for (j in <span class="kw">seq_len</span>(n)) {
+        pop_xo[[i]] &lt;-<span class="st"> </span>Meiosis::<span class="kw">cross_xo</span>(pop_xo[[i]], pop_xo[[i]], xoparam)
+    }
+}
+
+
+<span class="co"># conv$convert(pop[[1]]) ## error, because genotypic data of second founder not</span>
+<span class="co"># present</span>
+conv$<span class="kw">insert_founder</span>(<span class="kw">c</span>(55L, 77L), ind2)  ## insert second founder first
+pop_geno &lt;-<span class="st"> </span><span class="kw">lapply</span>(pop_xo, conv$convert)  ## convert whole population</code></pre></div>
+<p>Alternatively, we could have used the functions <code>Meiosis::self_geno</code> and <code>Meiosis::self_xo</code>, which are wrappers around <code>Meiosis::cross_geno</code> and <code>Meiosis::cross_xo</code>, for producing the selfings.</p>
+</div>
+<div id="example-4-creation-of-a-synthetic-population" class="section level3">
+<h3>Example 4: Creation of a synthetic population</h3>
+<p>In this example, we create a synthetic population (<em>segmental representation</em>) by crossing a number of founder individuals and subsequent random mating for several generations.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">make_synthetic &lt;-<span class="st"> </span>function(founder, n_ind, n_gen) {
+    
+    ## Cross parents
+    n_founder &lt;-<span class="st"> </span><span class="kw">length</span>(founder)
+    tmp &lt;-<span class="st"> </span><span class="kw">combn</span>(<span class="dt">x =</span> <span class="kw">seq_len</span>(n_founder), <span class="dt">m =</span> 2L)
+    combinations &lt;-<span class="st"> </span><span class="kw">split</span>(tmp, <span class="kw">col</span>(tmp))
+    pop_xo &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dt">n =</span> n_ind, <span class="dt">simplify =</span> <span class="ot">FALSE</span>, {
+        pair &lt;-<span class="st"> </span><span class="kw">unlist</span>(<span class="kw">sample</span>(combinations, <span class="dt">size =</span> 1L))
+        <span class="kw">cross_xo</span>(founder[[pair[1L]]], founder[[pair[2L]]], xoparam)
+    })
+    
+    ## Random mating
+    for (i in <span class="kw">seq_len</span>(n_gen)) {
+        pop_xo_new &lt;-<span class="st"> </span>pop_xo  ## copy
+        for (j in <span class="kw">seq_len</span>(n_ind)) {
+            pair &lt;-<span class="st"> </span><span class="kw">sample</span>(n_ind, <span class="dt">size =</span> 2L, <span class="dt">replace =</span> <span class="ot">TRUE</span>)  ## selfing possible
+            pop_xo_new[[j]] &lt;-<span class="st"> </span><span class="kw">cross_xo</span>(pop_xo[[pair[1L]]], pop_xo[[pair[2L]]], xoparam)
+        }
+        pop_xo &lt;-<span class="st"> </span>pop_xo_new  ## swap
+    }
+    pop_xo
+}
+
+n_founder &lt;-<span class="st"> </span>5L  ## number of founders
+n_ind &lt;-<span class="st"> </span>100L  ## size of synthetic
+n_gen &lt;-<span class="st"> </span>10L  <span class="co"># generations of random mating</span>
+alleles &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="kw">seq_len</span>(n_founder), function(i) <span class="kw">c</span>(2L *<span class="st"> </span>i -<span class="st"> </span>1L, 2L *<span class="st"> </span>i))
+founder &lt;-<span class="st"> </span><span class="kw">lapply</span>(alleles, create_xo_founder, <span class="dt">L =</span> L)
+
+## Create synthetic
+<span class="kw">system.time</span>(syn &lt;-<span class="st"> </span><span class="kw">make_synthetic</span>(founder, n_ind, n_gen))</code></pre></div>
+<pre><code>##    user  system elapsed 
+##   0.018   0.000   0.018</code></pre>
+</div>
+<div id="example-5-computation-of-realized-coefficients-of-co-ancestry" class="section level3">
+<h3>Example 5: Computation of realized coefficients of co-ancestry</h3>
+<p>Here, we calculate realized coefficient of co-ancestry. These are analogous to the classical co-ancestry coefficients but take into account variation due to Mendelian sampling.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Calculate realized coefficients of co-ancestry.
+Meiosis::<span class="kw">realized_coancestry</span>(f)</code></pre></div>
+<pre><code>## [1] 0.5</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Meiosis::<span class="kw">realized_coancestry</span>(p_xo)  ## selfing progeny, expected coefficient is 0.75.</code></pre></div>
+<pre><code>## [1] 0.7547263</code></pre>
+</div>
+<div id="example-6-comparison-between-expected-and-realized-coefficients-of-co-ancestry" class="section level3">
+<h3>Example 6: Comparison between expected and realized coefficients of co-ancestry</h3>
+<p>Here, we verify that the realized coefficients of co-ancestry correspond, on average, to expected coefficients, which are half of the additive genetic relationships between individuals. We therefore simulate a small pedigree and used the package <a href="https://CRAN.R-project.org/package=pedigree">pedigree</a> to compute additive genetic relationships.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">&quot;pedigree&quot;</span>)
+
+## Create a simple pedigree
+id &lt;-<span class="st"> </span><span class="dv">1</span>:<span class="dv">6</span>
+dam &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">4</span>)
+sire &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>)
+ped &lt;-<span class="st"> </span><span class="kw">data.frame</span>(id, dam, sire)
+
+## Compute the additive genetic relationship matrix and coefficients of
+## co-ancestry
+cwd &lt;-<span class="st"> </span><span class="kw">getwd</span>()
+tpdir &lt;-<span class="st"> </span><span class="kw">tempdir</span>()
+<span class="kw">setwd</span>(tpdir)
+<span class="kw">invisible</span>(<span class="kw">makeA</span>(ped, <span class="dt">which =</span> <span class="kw">rep</span>(<span class="ot">TRUE</span>, <span class="kw">length</span>(id))))
+coanc &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="st">&quot;A.txt&quot;</span>)
+<span class="kw">setwd</span>(cwd)
+
+A &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="ot">NA_real_</span>, <span class="dt">nrow =</span> <span class="kw">length</span>(id), <span class="dt">ncol =</span> <span class="kw">length</span>(id))
+A[<span class="kw">as.matrix</span>(coanc[<span class="dv">1</span>:<span class="dv">2</span>])] &lt;-<span class="st"> </span>A[<span class="kw">as.matrix</span>(coanc[<span class="dv">2</span>:<span class="dv">1</span>])] &lt;-<span class="st"> </span>coanc[[<span class="dv">3</span>]]
+eCoc &lt;-<span class="st"> </span>A/<span class="dv">2</span>  ## expected coefficients of co-ancestry
+
+## Helper function for simulating pedigree and computing realized coefficients of
+## co-ancestry.
+sim_ped &lt;-<span class="st"> </span>function() {
+    f1 &lt;-<span class="st"> </span><span class="kw">create_xo_founder</span>(<span class="kw">c</span>(1L, 2L), L)
+    f2 &lt;-<span class="st"> </span><span class="kw">create_xo_founder</span>(<span class="kw">c</span>(3L, 4L), L)
+    i1 &lt;-<span class="st"> </span><span class="kw">cross_xo</span>(f1, f2, xoparam)
+    i2 &lt;-<span class="st"> </span><span class="kw">cross_xo</span>(f1, f2, xoparam)
+    i3 &lt;-<span class="st"> </span><span class="kw">cross_xo</span>(i1, i2, xoparam)
+    i4 &lt;-<span class="st"> </span><span class="kw">cross_xo</span>(i2, i3, xoparam)
+    
+    tmp &lt;-<span class="st"> </span><span class="kw">list</span>(f1, f2, i1, i2, i3, i4)
+    C &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="dt">data =</span> <span class="ot">NA_real_</span>, <span class="dt">nrow =</span> <span class="kw">length</span>(id), <span class="dt">ncol =</span> <span class="kw">length</span>(id))
+    for (i in <span class="kw">seq_along</span>(id)) for (j in i:<span class="kw">length</span>(id)) C[i, j] &lt;-<span class="st"> </span>C[j, i] &lt;-<span class="st"> </span><span class="kw">realized_coancestry</span>(tmp[[i]], 
+        tmp[[j]])
+    C
+}
+
+## Verify that, on average, the realized coefficients are equal to the expected
+## coefficients.
+n &lt;-<span class="st"> </span>1000L  ## number of replicates
+rCoc_avg &lt;-<span class="st"> </span><span class="kw">Reduce</span>(<span class="dt">f =</span> <span class="st">`</span><span class="dt">+</span><span class="st">`</span>, <span class="dt">x =</span> <span class="kw">replicate</span>(n, <span class="kw">sim_ped</span>(), <span class="dt">simplify =</span> <span class="ot">FALSE</span>))/n  ##  take average
+<span class="kw">plot</span>(<span class="kw">as.vector</span>(rCoc_avg), <span class="kw">as.vector</span>(eCoc))
+<span class="kw">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>)</code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="further-examples" class="section level3">
+<h3>Further examples</h3>
+<p>We can also produce a doubled haploid progeny, both from the “segmental” and the “genotypic” representation.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Simulate a doubled haploid individual.
+<span class="kw">str</span>(Meiosis::<span class="kw">dh_geno</span>(ind, positions, xoparam))</code></pre></div>
+<pre><code>## List of 2
+##  $ paternal:List of 3
+##   ..$ : int [1:9] 1 0 0 1 1 0 1 0 0
+##   ..$ : int [1:10] 0 0 0 1 1 1 0 1 1 1
+##   ..$ : int [1:5] 0 0 0 1 0
+##  $ maternal:List of 3
+##   ..$ : int [1:9] 1 0 0 1 1 0 1 0 0
+##   ..$ : int [1:10] 0 0 0 1 1 1 0 1 1 1
+##   ..$ : int [1:5] 0 0 0 1 0</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">str</span>(conv$<span class="kw">convert</span>(Meiosis::<span class="kw">dh_xo</span>(f, xoparam)))</code></pre></div>
+<pre><code>## List of 2
+##  $ :List of 3
+##   ..$ : int [1:9] 1 0 0 1 1 0 1 0 0
+##   ..$ : int [1:10] 0 1 0 1 1 1 0 1 0 0
+##   ..$ : int [1:5] 1 0 0 1 0
+##  $ :List of 3
+##   ..$ : int [1:9] 1 0 0 1 1 0 1 0 0
+##   ..$ : int [1:10] 0 1 0 1 1 1 0 1 0 0
+##   ..$ : int [1:5] 1 0 0 1 0</code></pre>
+<p>We can also compute the realized heterozygosity of an individual, i.e., the proportion of the genome that is heterozygous with respect to the founder alleles present.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Calculate realized heterozygosity.
+Meiosis::<span class="kw">realized_heter</span>(p_xo)</code></pre></div>
+<pre><code>## [1] 0.4905474</code></pre>
+</div>
+</div>
+<div id="acknowledgements" class="section level1">
+<h1>Acknowledgements</h1>
+<p>Parts of the core functionality and documentation of <strong>Meiosis</strong> was inspired and adapted, respectively, from the package <a href="https://github.com/kbroman/simcross">simcross</a> of <a href="http://kbroman.org/">Karl Broman</a>.</p>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>University of Hohenheim, Institute of Plant Breeding, Seed Science and Population Genetics, Stuttgart<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p><a href="https://doi.org/10.1534/g3.115.016683">XSim</a><a href="#fnref2">↩</a></p></li>
+</ol>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
