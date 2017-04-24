@@ -4,7 +4,7 @@
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
@@ -12,9 +12,9 @@
 
 <meta name="author" content="Dominik Mueller" />
 
-<meta name="date" content="2017-04-04" />
+<meta name="date" content="2017-04-24" />
 
-<title>Meiosis: Simulation of meiosis in plant breeding research.</title>
+<title>Meiosis: Simulation of meiosis in plant breeding research</title>
 
 
 
@@ -69,9 +69,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 
-<h1 class="title toc-ignore">Meiosis: Simulation of meiosis in plant breeding research.</h1>
+<h1 class="title toc-ignore">Meiosis: Simulation of meiosis in plant breeding research</h1>
 <h4 class="author"><em>Dominik Mueller<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a></em></h4>
-<h4 class="date"><em>2017-04-04</em></h4>
+<h4 class="date"><em>2017-04-24</em></h4>
 
 
 <div id="TOC">
@@ -137,8 +137,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="examples" class="section level1">
 <h1>Examples</h1>
 <p>The C++ routines use an independent random number generator. For seeding it, do e.g.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">&quot;Meiosis&quot;</span>)
-<span class="kw">set.seed</span>(123L)  ## Seed R's rng
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">&quot;Meiosis&quot;</span>)</code></pre></div>
+<pre><code>## Package Meiosis, version 1.0.1</code></pre>
+<pre><code>## Dominik Mueller</code></pre>
+<pre><code>## Use Meiosis::seed_rng to seed the random number generator (Mersenne Twister, std::mt19937)</code></pre>
+<pre><code>## Otherwise a random seed is used.</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(123L)  ## Seed R's rng
 Meiosis::<span class="kw">seed_rng</span>(<span class="dt">seed =</span> 123L)  ## Seed rng used by Meiosis</code></pre></div>
 <pre><code>## [1] 123</code></pre>
 <div id="create-crossover-parameters" class="section level3">
@@ -150,7 +154,7 @@ xoparam &lt;-<span class="st"> </span><span class="kw">create_xoparam</span>(L) 
 <span class="kw">str</span>(xoparam)</code></pre></div>
 <pre><code>## List of 5
 ##  $ L               : num [1:3] 158 258 182
-##  $ m               : num 0
+##  $ m               : int 0
 ##  $ p               : num 1
 ##  $ obligate_chiasma: logi FALSE
 ##  $ Lstar           : num [1:3] 158 258 182</code></pre>
@@ -161,8 +165,8 @@ xoparam &lt;-<span class="st"> </span><span class="kw">create_xoparam</span>(L) 
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">n_loci &lt;-<span class="st"> </span><span class="kw">round</span>(<span class="kw">runif</span>(<span class="dt">n =</span> n_chr, <span class="dt">min =</span> 5L, <span class="dt">max =</span> 10L))  ## sample number of loci
 ## sample positions of loci on the chromosome
 positions &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="kw">seq_len</span>(n_chr), function(i) <span class="kw">sort</span>(<span class="kw">runif</span>(n_loci[i], <span class="dt">min =</span> <span class="dv">0</span>, <span class="dt">max =</span> L[i])))</code></pre></div>
-<div id="example-1-simulate-meiosis-with-genomic-data-in-genotypic-representation." class="section level4">
-<h4>Example 1: Simulate meiosis with genomic data in <em>genotypic</em> representation.</h4>
+<div id="example-1-simulation-of-meiosis-with-genomic-data-in-genotypic-representation." class="section level4">
+<h4>Example 1: Simulation of meiosis with genomic data in <em>genotypic</em> representation.</h4>
 <p>This example shows how to simulate meiosis with data in the “genotypic” representation. We first simulate some genotypic data of an individual and then call the function <code>cross_geno</code> for simulating meiosis. In this case, the output is a selfing progeny of <code>ind</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ind &lt;-<span class="st"> </span><span class="kw">replicate</span>(2L, <span class="kw">lapply</span>(n_loci, function(n) <span class="kw">sample</span>(<span class="kw">c</span>(0L, 1L), n, <span class="dt">replace =</span> <span class="ot">TRUE</span>)), 
     <span class="dt">simplify =</span> <span class="ot">FALSE</span>)  ## simulate some genotypic data
@@ -190,8 +194,8 @@ positions &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span cla
 ##   ..$ : int [1:5] 1 0 0 0 1</code></pre>
 </div>
 </div>
-<div id="example-2-simulate-meiosis-with-genomic-data-in-segmental-representation." class="section level3">
-<h3>Example 2: Simulate meiosis with genomic data in <em>segmental</em> representation.</h3>
+<div id="example-2-simulation-of-meiosis-with-genomic-data-in-segmental-representation." class="section level3">
+<h3>Example 2: Simulation of meiosis with genomic data in <em>segmental</em> representation.</h3>
 <p>Here, I show how to do the same as in Example 1, but with data in the segmental representation. We first have to create one or multiple founder individuals. Each founder individual has two (distinct!) founder alleles. These founder alleles are represented by arbitrary, but unique integers. Think about these founder alleles as “tags” that are attached to chromosomal segments. As these segments are “dropped down” the pedigree and sometimes altered by a recombination event, the “tags” always guarantee that each chunk of the genome can be unambiguously assigned to one of the founder individuals. A founder individual is created with the function <code>create_xo_founder</code>, which accepts as parameters the integer labels and a vector that specifies the length of each chromosome in cM. A selfing is then simulated by a call to <code>cross_xo</code>.</p>
 <p>Because data in the “segmental” representation are not useful for many purposes, we usually will convert them (back) to the “genotypic” representation. To do so, we first have to create a <code>Converter</code> object. This is a special data structures (reference class), which has two methods: <code>insert_founder</code> and <code>convert</code>. Before starting with the conversion, it is necessary to tell the <code>Converter</code> object the genotypes of the founder individuals. This is done via the method <code>insert_founder</code>. The genotypic data of each founder individual that was involved in the generation of progenty has to be added with a call to this method, otherwise an error will be thrown later.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">f_alleles &lt;-<span class="st"> </span><span class="kw">c</span>(21L, 65L)  ## 21 and 65 are arbitrary integers
@@ -267,8 +271,8 @@ conv$<span class="kw">insert_founder</span>(<span class="kw">c</span>(55L, 77L),
 pop_geno &lt;-<span class="st"> </span><span class="kw">lapply</span>(pop_xo, conv$convert)  ## convert whole population</code></pre></div>
 <p>Alternatively, we could have used the functions <code>Meiosis::self_geno</code> and <code>Meiosis::self_xo</code>, which are wrappers around <code>Meiosis::cross_geno</code> and <code>Meiosis::cross_xo</code>, for producing the selfings.</p>
 </div>
-<div id="example-4-creation-of-a-synthetic-population" class="section level3">
-<h3>Example 4: Creation of a synthetic population</h3>
+<div id="example-4-creation-of-a-synthetic-population." class="section level3">
+<h3>Example 4: Creation of a synthetic population.</h3>
 <p>In this example, we create a synthetic population (<em>segmental representation</em>) by crossing a number of founder individuals and subsequent random mating for several generations.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">make_synthetic &lt;-<span class="st"> </span>function(founder, n_ind, n_gen) {
     
@@ -302,10 +306,10 @@ founder &lt;-<span class="st"> </span><span class="kw">lapply</span>(alleles, cr
 ## Create synthetic
 <span class="kw">system.time</span>(syn &lt;-<span class="st"> </span><span class="kw">make_synthetic</span>(founder, n_ind, n_gen))</code></pre></div>
 <pre><code>##    user  system elapsed 
-##   0.018   0.000   0.018</code></pre>
+##   0.024   0.004   0.028</code></pre>
 </div>
-<div id="example-5-computation-of-realized-coefficients-of-co-ancestry" class="section level3">
-<h3>Example 5: Computation of realized coefficients of co-ancestry</h3>
+<div id="example-5-computation-of-realized-coefficients-of-co-ancestry." class="section level3">
+<h3>Example 5: Computation of realized coefficients of co-ancestry.</h3>
 <p>Here, we calculate realized coefficient of co-ancestry. These are analogous to the classical co-ancestry coefficients but take into account variation due to Mendelian sampling.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Calculate realized coefficients of co-ancestry.
 Meiosis::<span class="kw">realized_coancestry</span>(f)</code></pre></div>
@@ -313,12 +317,19 @@ Meiosis::<span class="kw">realized_coancestry</span>(f)</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Meiosis::<span class="kw">realized_coancestry</span>(p_xo)  ## selfing progeny, expected coefficient is 0.75.</code></pre></div>
 <pre><code>## [1] 0.7547263</code></pre>
 </div>
-<div id="example-6-comparison-between-expected-and-realized-coefficients-of-co-ancestry" class="section level3">
-<h3>Example 6: Comparison between expected and realized coefficients of co-ancestry</h3>
+<div id="example-6-comparison-between-expected-and-realized-coefficients-of-co-ancestry." class="section level3">
+<h3>Example 6: Comparison between expected and realized coefficients of co-ancestry.</h3>
 <p>Here, we verify that the realized coefficients of co-ancestry correspond, on average, to expected coefficients, which are half of the additive genetic relationships between individuals. We therefore simulate a small pedigree and used the package <a href="https://CRAN.R-project.org/package=pedigree">pedigree</a> to compute additive genetic relationships.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">&quot;pedigree&quot;</span>)
-
-## Create a simple pedigree
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">&quot;pedigree&quot;</span>)</code></pre></div>
+<pre><code>## Loading required package: Matrix</code></pre>
+<pre><code>## Loading required package: HaploSim</code></pre>
+<pre><code>## Loading required package: reshape</code></pre>
+<pre><code>## 
+## Attaching package: 'reshape'</code></pre>
+<pre><code>## The following object is masked from 'package:Matrix':
+## 
+##     expand</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Create a simple pedigree
 id &lt;-<span class="st"> </span><span class="dv">1</span>:<span class="dv">6</span>
 dam &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">4</span>)
 sire &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>)

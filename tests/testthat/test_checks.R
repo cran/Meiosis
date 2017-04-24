@@ -5,7 +5,7 @@ data('exdat', package = 'Meiosis')
 
 x <- exdat$positions
 test_that("check_positions ok", {
-  testthat::expect_true(check_positions(x))
+  testthat::expect_null(check_positions(x))
   y <- x
   y[[1L]] <- rev(y[[1L]])
   testthat::expect_error(check_positions(y))
@@ -19,7 +19,7 @@ test_that("check_positions ok", {
 
 x <- exdat$founder
 test_that("check_xo_individual ok", {
-  testthat::expect_true(check_xo_individual(x))
+  testthat::expect_null(check_xo_individual(x))
   testthat::expect_error(check_xo_individual(x[[1L]]))
   y <- x
   y[[1L]][[1L]] <- NULL
@@ -31,9 +31,24 @@ test_that("check_xo_individual ok", {
 
 x <- exdat$ind
 test_that("check_geno_individual ok", {
-  testthat::expect_true(check_geno_individual(x))
+  testthat::expect_null(check_geno_individual(x))
   testthat::expect_error(check_geno_individual(x[[1L]]))
   x[[1L]][[1L]] <- NULL
   testthat::expect_error(check_geno_individual(x))
+})
+
+
+x <- exdat$xoparam
+test_that("check_xoparam ok", {
+  testthat::expect_null(check_xoparam(x))
+  y <- x
+  y$L[1L] <- -1.0
+  testthat::expect_error(check_xoparam(y))
+  y <- x
+  y$m <- 3.0
+  testthat::expect_error(check_xoparam(y))
+  y <- x
+  y$Lstar[1L] <- y$L[1L] + 1e6
+  testthat::expect_error(check_xoparam(y))
 })
 
