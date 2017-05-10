@@ -1,7 +1,27 @@
 .onAttach <- function(libname, pkgname) {
+##   artwork <- "
+##   /\\\\,/\\\\,
+##  /| || ||         '              '
+##  || || ||   _-_  \\  /'\\\\  _-_, \\\\  _-_,
+##  ||=|= ||  || \\\\ || || || ||_.  || ||_.
+## ~|| || ||  ||/   || || ||  ~ || ||  ~ ||
+##  |, \\\\,\\\\, \\\\,/  \\\\ \\\\,/  ,-_-  \\\\ ,-_-
+## _-
+## "
+  artwork <- "
+  __  __        _              _      
+ |  \\/  |  ___ (_)  ___   ___ (_) ___ 
+ | |\\/| | / _ \\| | / _ \\ / __|| |/ __|
+ | |  | ||  __/| || (_) |\\__ \\| |\\__ \\
+ |_|  |_| \\___||_| \\___/ |___/|_||___/
+                                      
+"
+
+  packageStartupMessage(artwork)
   packageStartupMessage(sprintf('Package Meiosis, version %s', utils::packageVersion(pkgname)))
   packageStartupMessage('Dominik Mueller')
-  packageStartupMessage("Use Meiosis::seed_rng to seed the random number generator (Mersenne Twister, std::mt19937)")
+  packageStartupMessage("Use Meiosis::seed_rng to seed the RNG of the C++ routines ",
+                        "(Mersenne Twister)")
   packageStartupMessage("Otherwise a random seed is used.")
   invisible()
 }
@@ -17,7 +37,6 @@
 
 Rcpp::loadModule("Module", TRUE)
 
-
 #' @name Converter
 #' @docType class
 #'
@@ -26,11 +45,17 @@ Rcpp::loadModule("Module", TRUE)
 #' @description An object of type Converter is used to efficiently convert data from the
 #' segmental to the genotypic representation. This class has two methods that should be
 #' employed by the user: \code{insert_founder} and \code{convert}. Please look up their
-#' documentation with \code{help(Converter$insert_founder)} and code{help(Converter$convert)}.
+#' documentation with \code{help(Converter$insert_founder)} and \code{help(Converter$convert)}.
 #' Before starting conversion, all founder alleles and founder genotypes have to be added via
 #' the method \code{insert_founder}. Conversion is then done by the method \code{convert}.
 #'
-#' Please see the vignette (\code{vignette('Meiosis', package = 'Meiosis')}) for an example.
+#' The constructor has two parameters, \code{positions} and \code{use_names}
+#' (optional, defaults to \code{FALSE}).
+#' Parameter \code{positions} must be a list of vectors with the genetic positions.
+#' If these vectors are named, and if \code{use_names} is \code{TRUE},
+#' the result of a conversion via \code{convert} will also be named.
+#'
+#' Please see the vignette (\code{vignette('Introduction', package = 'Meiosis')}) for an example.
 #'
 NULL
 ## xyz <- setRefClass("xyz",
@@ -58,7 +83,7 @@ NULL
 #' @name Converter$insert_founder
 #'
 #' @title insert_founder
-#' 
+#'
 #' @description Insert founder genotypes.
 #'
 #' @param keys Integer vector. The two (unique) founder alleles.

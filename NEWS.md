@@ -1,3 +1,9 @@
+# Meiosis 1.0.2
+
+## Improvements
+* Loci names can now be automatically added if available.
+* Fixed some mistakes in the documentation.
+
 # Meiosis 1.0.1
 
 ## Improvements

@@ -102,59 +102,7 @@ founder <- lapply(alleles, create_xo_founder, L = L)
 system.time(syn <- make_synthetic(founder, n_ind, n_gen))
 
 ## ------------------------------------------------------------------------
-## Calculate realized coefficients of co-ancestry.
-Meiosis::realized_coancestry(f)
-Meiosis::realized_coancestry(p_xo)  ## selfing progeny, expected coefficient is 0.75.
-
-## ------------------------------------------------------------------------
-library('pedigree')
-
-## Create a simple pedigree
-id <- 1:6
-dam <- c(0, 0, 1, 1, 4, 4)
-sire <- c(0, 0, 2, 2, 3, 5)
-ped <- data.frame(id, dam, sire)
-
-## Compute the additive genetic relationship matrix and coefficients of co-ancestry
-cwd <- getwd()
-tpdir <- tempdir()
-setwd(tpdir)
-invisible(makeA(ped, which = rep(TRUE, length(id))))
-coanc <- read.table("A.txt")
-setwd(cwd)
-
-A <- matrix(NA_real_, nrow = length(id), ncol = length(id))
-A[as.matrix(coanc[1:2])] <- A[as.matrix(coanc[2:1])] <- coanc[[3]]
-eCoc <- A / 2  ## expected coefficients of co-ancestry
-
-## Helper function for simulating pedigree and computing realized coefficients of co-ancestry.
-sim_ped <- function() {
-  f1 <- create_xo_founder(c(1L, 2L), L)
-  f2 <- create_xo_founder(c(3L, 4L), L)
-  i1 <- cross_xo(f1, f2, xoparam)
-  i2 <- cross_xo(f1, f2, xoparam)
-  i3 <- cross_xo(i1, i2, xoparam)
-  i4 <- cross_xo(i2, i3, xoparam)
-
-  tmp <- list(f1, f2, i1, i2, i3, i4)
-  C <- matrix(data = NA_real_, nrow = length(id), ncol = length(id))
-  for (i in seq_along(id))
-    for (j in i:length(id))
-      C[i, j] <- C[j, i] <- realized_coancestry(tmp[[i]], tmp[[j]])
-  C
-}
-
-## Verify that, on average, the realized coefficients are equal to the expected coefficients.
-n <- 1000L  ## number of replicates
-rCoc_avg <- Reduce(f = `+`, x = replicate(n, sim_ped(), simplify = FALSE)) / n ##  take average
-plot(as.vector(rCoc_avg), as.vector(eCoc)); abline(0, 1)
-
-## ------------------------------------------------------------------------
 ## Simulate a doubled haploid individual.
 str(Meiosis::dh_geno(ind, positions, xoparam))
 str(conv$convert(Meiosis::dh_xo(f, xoparam)))
-
-## ------------------------------------------------------------------------
-## Calculate realized heterozygosity.
-Meiosis::realized_heter(p_xo) 
 

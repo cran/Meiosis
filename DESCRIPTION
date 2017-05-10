@@ -1,8 +1,8 @@
 Package: Meiosis
 Type: Package
 Title: Simulation of Meiosis in Plant Breeding Research
-Version: 1.0.1
-Date: 2017-04-24
+Version: 1.0.2
+Date: 2017-05-10
 Authors@R: c(
     person("Dominik", "Mueller", email = "dominikmueller64@yahoo.de", role = c("aut", "cre")),
     person(c("Karl", "W."), "Broman", email = "kbroman@biostat.wisc.edu", role = "aut"))
@@ -19,9 +19,9 @@ LazyData: true
 URL: https://github.com/DominikMueller64/Meiosis
 BugReports: https://github.com/DominikMueller64/Meiosis/issues
 NeedsCompilation: yes
-Packaged: 2017-04-24 07:49:06 UTC; domi89
+Packaged: 2017-05-10 08:00:25 UTC; domi89
 Author: Dominik Mueller [aut, cre],
   Karl W. Broman [aut]
 Maintainer: Dominik Mueller <dominikmueller64@yahoo.de>
 Repository: CRAN
-Date/Publication: 2017-04-24 09:12:03 UTC
+Date/Publication: 2017-05-10 08:06:36 UTC
